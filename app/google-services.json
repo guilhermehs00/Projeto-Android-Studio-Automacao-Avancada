@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "195797040328",
+    "project_id": "automacao-avancada-417713",
+    "storage_bucket": "automacao-avancada-417713.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195797040328:android:1cefe36cfab638c1d0b9fd",
+        "android_client_info": {
+          "package_name": "com.guilherme.projetoautavancada"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbYZ2UPMVJYLvxYNFsSl8g2p2H2Rv_JWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
