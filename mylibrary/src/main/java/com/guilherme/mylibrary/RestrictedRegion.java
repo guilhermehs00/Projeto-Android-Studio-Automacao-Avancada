@@ -47,7 +47,7 @@ public RestrictedRegion(String nameJsonCriptografada, String latJsonCriptografad
         System.out.println("\nCalculando distancia dentro da RestrictedRegion\n");
         float[] distancia = new float[1];
         Location.distanceBetween(lat1, long1, lat2, long2, distancia);
-        return distancia[0] < 2;
+        return distancia[0] < 5;
     }
 
     public Region getMainRegion() {

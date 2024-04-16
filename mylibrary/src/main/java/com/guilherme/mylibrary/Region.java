@@ -60,7 +60,7 @@ public class Region {
         System.out.println("\nCalculando distancia dentro da Region\n");
         float[] results = new float[1];
         Location.distanceBetween(lat1, long1, lat2, long2, results);
-        return results[0] < 5;
+        return results[0] < 30;
     }
 
     public String getName() {return name;}
