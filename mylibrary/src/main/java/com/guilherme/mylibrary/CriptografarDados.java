@@ -20,16 +20,21 @@ public class CriptografarDados extends Thread {
     private String mainRegionJsonCriptografada;
     private String restrictedJsonCriptografada;
 
+    // Contrutor para criptografar uma Região
     public CriptografarDados(Region region) {
         this.region = region;
         this.Sregion = null;
         this.Rregion = null;
     }
+
+    // Contrutor para criptografar uma SubRegião
     public CriptografarDados(SubRegion Sregion) {
         this.Sregion = Sregion;
         this.region = null;
         this.Rregion = null;
     }
+
+    // Contrutor para criptografar uma Região Restrita
     public CriptografarDados(RestrictedRegion Rregion) {
         this.Rregion = Rregion;
         this.region = null;
@@ -42,6 +47,7 @@ public class CriptografarDados extends Thread {
             if (region != null){
                 encryptMain(region);
 
+                // Cria um novo objeto Region com os valores criptografados
                 this.regionJsonCriptografada = new Region(
                         nameJsonCriptografada,
                         latJsonCriptografada,
@@ -56,6 +62,7 @@ public class CriptografarDados extends Thread {
                 String mainRegionJson = gson.toJson(Sregion.getMainRegion());
                 this.mainRegionJsonCriptografada = Cryptography.encrypt(mainRegionJson);
 
+                // Cria um novo objeto SubRegion com os valores criptografados
                 this.SregionJsonCriptografada = new SubRegion(
                         nameJsonCriptografada,
                         latJsonCriptografada,
@@ -74,6 +81,7 @@ public class CriptografarDados extends Thread {
                 String restrictedJson = gson.toJson(Rregion.isRestricted());
                 this.restrictedJsonCriptografada = Cryptography.encrypt(restrictedJson);
 
+                // Cria um novo objeto RestrictedRegion com os valores criptografados
                 this.RregionJsonCriptografada = new RestrictedRegion(
                         nameJsonCriptografada,
                         latJsonCriptografada,
@@ -90,6 +98,8 @@ public class CriptografarDados extends Thread {
             e.printStackTrace();
         }
     }
+
+    // Criptografa os atributos da super classe
     private void encryptMain(Region r){
         try{
             this.nameJsonCriptografada = Cryptography.encrypt(r.getName());

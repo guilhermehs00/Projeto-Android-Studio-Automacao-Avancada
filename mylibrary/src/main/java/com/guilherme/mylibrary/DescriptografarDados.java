@@ -20,7 +20,7 @@ public class DescriptografarDados extends Thread {
     private volatile SubRegion SregionJsonDescriptografada;
     private volatile RestrictedRegion RregionJsonDescriptografada;
 
-
+    // Contrutor para decriptografar Região
     public DescriptografarDados(Region regionCriptografada) {
         System.out.println("Descripitografando Region");
         this.regionCriptografada = regionCriptografada;
@@ -28,6 +28,7 @@ public class DescriptografarDados extends Thread {
         this.RregionCriptografada = null;
     }
 
+    // Contrutor para decriptografar SubRegião
     public DescriptografarDados(SubRegion SregionCriptografada) {
         System.out.println("Descripitografando uma SubRegion");
         this.regionCriptografada = null;
@@ -35,6 +36,7 @@ public class DescriptografarDados extends Thread {
         this.RregionCriptografada = null;
     }
 
+    // Contrutor para decriptografar Região Restrita
     public DescriptografarDados(RestrictedRegion RregionCriptografada) {
         System.out.println("Descripitografando uma RestritaRegion");
         this.regionCriptografada = null;
@@ -64,6 +66,7 @@ public class DescriptografarDados extends Thread {
                 String decryptedMainRegionJson = Cryptography.decrypt(SregionCriptografada.getCmainRegion()); // Descriptografa
                 this.mainRegionDescriptografado = gson.fromJson(decryptedMainRegionJson, Region.class); // Deserializa
 
+                // Cria um novo objeto SubRegion com os valores descriptografados
                 this.SregionJsonDescriptografada = new SubRegion(
                         nameDescriptografado,
                         latDescriptografado,
@@ -82,6 +85,7 @@ public class DescriptografarDados extends Thread {
                 String decryptedRestrictedJson = Cryptography.decrypt(RregionCriptografada.getCrestricted()); // Descriptografa
                 this.restrictedJDescriptografado = gson.fromJson(decryptedRestrictedJson, Boolean.class); // Deserializa
 
+                // Cria um novo objeto RestrictedRegion com os valores descriptografados
                 this.RregionJsonDescriptografada = new RestrictedRegion(
                         nameDescriptografado,
                         latDescriptografado,
@@ -99,6 +103,7 @@ public class DescriptografarDados extends Thread {
         }
     }
 
+    // Descriptografa os atributos da super classe
     private void DescryptMain(Region r){
         try{
             // Descriptografa e armazena cada campo
