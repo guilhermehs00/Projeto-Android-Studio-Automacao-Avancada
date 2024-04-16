@@ -79,8 +79,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addRegionButton = findViewById(R.id.addRegionButton);
         GravarBdButtom = findViewById(R.id.GravarBdButtom);
         botaoCamada = findViewById(R.id.botaoCamada);
-
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+
         // Verifique se é a primeira execução
         boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
         if (isFirstRun) {
