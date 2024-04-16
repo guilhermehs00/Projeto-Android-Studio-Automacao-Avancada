@@ -150,10 +150,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         addNewRegion();
                         break;
                     case "101": // Há Região, não há SubRegião, há Região Restrita
-                        addNewSubRegion();
+                        runOnUiThread(() -> {
+                            Toast.makeText(MainActivity.this, "Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
+                        });
                         break;
-                    case "011": // Há Região, há SubRegião, não há Região Restrita
-                        addNewRestrictedRegion();
+                    case "110": // Há Região, há SubRegião, não há Região Restrita
+                        runOnUiThread(() -> {
+                            Toast.makeText(MainActivity.this, "Sub Região já cadastrada!", Toast.LENGTH_LONG).show();
+                        });
                         break;
                     case "100": // Há Região, não há SubRegião, não há Região Restrita
                         addSUBorREST();
@@ -216,7 +220,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             private void addNewRestrictedRegion() {
                 try {
                     contRestRegion++;
-                    RestrictedRegion atualRestRegion = new RestrictedRegion("Região restrita " + contRestRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion, true);
+                    RestrictedRegion atualRestRegion = new RestrictedRegion(
+                            "Região restrita " + contRestRegion + " da " + auxRegion.getName(),
+                            latitudeAtual,
+                            longitudeAtual,
+                            userId,
+                            auxRegion,
+                            true
+                    );
 
                     CriptografarDados criptografarRestRegion = new CriptografarDados(atualRestRegion);
                     criptografarRestRegion.start();
