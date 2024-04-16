@@ -167,13 +167,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             private void addNewRegion() {
-                contRegion++;
-                Region atualRegion = new Region("Região " + contRegion, latitudeAtual, longitudeAtual, userId);
-
-                CriptografarDados criptografarRegion = new CriptografarDados(atualRegion);
-                criptografarRegion.start();
                 try {
+                    contRegion++;
+                    Region atualRegion = new Region(
+                            "Região " + contRegion,
+                            latitudeAtual,
+                            longitudeAtual,
+                            userId
+                    );
+
+                    CriptografarDados criptografarRegion = new CriptografarDados(atualRegion);
+                    criptografarRegion.start();
                     criptografarRegion.join();  // Aguarda a conclusão da thread de criptografia
+
                     Region regionJsonCriptografada = criptografarRegion.getRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(regionJsonCriptografada);  // Adiciona a Region criptografada à fila
                 } catch (InterruptedException e) {
@@ -185,12 +191,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             private void addNewSubRegion() {
                 try {
                     contSubRegion++;
-                    SubRegion atualSubRegion = new SubRegion("Sub Região " + contSubRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion);
+                    SubRegion atualSubRegion = new SubRegion(
+                            "Sub Região " + contSubRegion + " da " + auxRegion.getName(),
+                            latitudeAtual,
+                            longitudeAtual,
+                            userId,
+                            auxRegion
+                    );
 
                     CriptografarDados criptografarSubRegion = new CriptografarDados(atualSubRegion);
                     criptografarSubRegion.start();
-
                     criptografarSubRegion.join();  // Aguarda a conclusão da thread de criptografia
+
                     SubRegion SubregionJsonCriptografada = criptografarSubRegion.getSRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(SubregionJsonCriptografada);  // Adiciona a string criptografada à fila
 
@@ -208,8 +220,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     CriptografarDados criptografarRestRegion = new CriptografarDados(atualRestRegion);
                     criptografarRestRegion.start();
-
                     criptografarRestRegion.join();  // Aguarda a conclusão da thread de criptografia
+
                     RestrictedRegion RestregionJsonCriptografada = criptografarRestRegion.getRRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(RestregionJsonCriptografada);  // Adiciona a string criptografada à fila
 
@@ -230,10 +242,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             private void addRegionFila(Region region) {
-                Thread adicionarNaFila = new AdicionarFila(filaDeRegions, region, semaphore);
-                adicionarNaFila.start();
                 try {
+                    Thread adicionarNaFila = new AdicionarFila(filaDeRegions, region, semaphore);
+                    adicionarNaFila.start();
                     adicionarNaFila.join();
+
                     String tipoRegion;
                     if (region instanceof SubRegion) {
                         tipoRegion = "SubRegião";
