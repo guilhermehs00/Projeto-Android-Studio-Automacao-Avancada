@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.androidLibrary)
+    id ("maven-publish")
 }
 
 android {
@@ -22,6 +23,27 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("minhapublication") {
+            groupId = "com.guilherme"
+            artifactId = "projetoavancada"
+            version = "1.0"
+            artifact("$buildDir/outputs/aar/mylibrary-release.aar")
+        }
+    }
+    repositories{
+        maven{
+            name = "GithubPackages"
+            url = uri("https://maven.pkg.github.com/guilhermehs00/Projeto-Android-Studio-Automacao-Avancada")
+            credentials{
+                username = "guilhermehs00"
+                password = "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"
+            }
+        }
     }
 }
 
