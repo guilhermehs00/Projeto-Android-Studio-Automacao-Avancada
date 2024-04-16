@@ -6,11 +6,11 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class AdicionarFila extends Thread {
-    private final Queue<String> filaDeRegion;
-    private final String region;
+    private final Queue<Region> filaDeRegion;
+    private Region region;
     private final Semaphore semaphore;
 
-    public AdicionarFila(Queue<String> filaDeRegion, String region, Semaphore semaphore) {
+    public AdicionarFila(Queue<Region> filaDeRegion, Region region, Semaphore semaphore) {
         this.filaDeRegion = filaDeRegion;
         this.region = region;
         this.semaphore = semaphore;

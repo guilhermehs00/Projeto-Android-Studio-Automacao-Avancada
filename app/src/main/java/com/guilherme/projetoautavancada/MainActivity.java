@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private double latitudeAtual = 0.0;
     private double longitudeAtual = 0.0;
-    private Queue<String> filaDeRegions = new LinkedList<>();
+    private Queue<Region> filaDeRegions = new LinkedList<>();
     private int contRegion = 0;
     private int contSubRegion = 0;
     private int contRestRegion = 0;
@@ -143,31 +143,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             private void partiuAddRegion(AtomicBoolean RegProx, AtomicBoolean SubRegProx, AtomicBoolean RestRegProx) {
-                if (!RegProx.get() && !SubRegProx.get() && !RestRegProx.get()) {
-                    addNewRegion();
-                } else if (RegProx.get() && !SubRegProx.get() && RestRegProx.get()) {
-                    addNewSubRegion();
-                } else if (RegProx.get() && SubRegProx.get() && !RestRegProx.get()) {
-                    addNewRestrictedRegion();
-                } else if (RegProx.get() && !SubRegProx.get() && !RestRegProx.get()) {
-                    addSUBorREST();
-                } else {
-                    runOnUiThread(() -> {
-                        Toast.makeText(MainActivity.this, "Região/SubRegião/Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
-                    });
+                String chave = (RegProx.get() ? "1" : "0") + (SubRegProx.get() ? "1" : "0") + (RestRegProx.get() ? "1" : "0");
+
+                switch (chave) {
+                    case "000": // Não há Região, SubRegião ou Região Restrita próxima
+                        addNewRegion();
+                        break;
+                    case "101": // Há Região, não há SubRegião, há Região Restrita
+                        addNewSubRegion();
+                        break;
+                    case "011": // Há Região, há SubRegião, não há Região Restrita
+                        addNewRestrictedRegion();
+                        break;
+                    case "100": // Há Região, não há SubRegião, não há Região Restrita
+                        addSUBorREST();
+                        break;
+                    default:
+                        runOnUiThread(() -> {
+                            Toast.makeText(MainActivity.this, "(Região / Sub Região / Região Restrita) já cadastrada!", Toast.LENGTH_LONG).show();
+                        });
+                        break;
                 }
             }
 
             private void addNewRegion() {
                 contRegion++;
-                Region atualRegion = new Region("Região " + contRegion, latitudeAtual, longitudeAtual, userId, "Region");
+                Region atualRegion = new Region("Região " + contRegion, latitudeAtual, longitudeAtual, userId);
 
                 CriptografarDados criptografarRegion = new CriptografarDados(atualRegion);
                 criptografarRegion.start();
                 try {
                     criptografarRegion.join();  // Aguarda a conclusão da thread de criptografia
-                    String regionJsonCriptografada = criptografarRegion.getEncryptedJson();  // Obtém o resultado após a conclusão
-                    addRegionFila(regionJsonCriptografada);  // Adiciona a string criptografada à fila
+                    Region regionJsonCriptografada = criptografarRegion.getRegionEncryptedJson();  // Obtém o resultado após a conclusão
+                    addRegionFila(regionJsonCriptografada);  // Adiciona a Region criptografada à fila
                 } catch (InterruptedException e) {
                     System.err.println("Thread interrompida: " + e.getMessage());
                     e.printStackTrace();
@@ -177,13 +185,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             private void addNewSubRegion() {
                 try {
                     contSubRegion++;
-                    SubRegion atualSubRegion = new SubRegion("Sub Região " + contSubRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion, "SubRegion");
+                    SubRegion atualSubRegion = new SubRegion("Sub Região " + contSubRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion);
 
                     CriptografarDados criptografarSubRegion = new CriptografarDados(atualSubRegion);
                     criptografarSubRegion.start();
                     try {
                         criptografarSubRegion.join();  // Aguarda a conclusão da thread de criptografia
-                        String SubregionJsonCriptografada = criptografarSubRegion.getEncryptedJson();  // Obtém o resultado após a conclusão
+                        SubRegion SubregionJsonCriptografada = criptografarSubRegion.getSRegionEncryptedJson();  // Obtém o resultado após a conclusão
                         addRegionFila(SubregionJsonCriptografada);  // Adiciona a string criptografada à fila
                     } catch (InterruptedException e) {
                         System.err.println("Thread interrompida: " + e.getMessage());
@@ -198,13 +206,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             private void addNewRestrictedRegion() {
                 contRestRegion++;
-                RestrictedRegion atualRestRegion = new RestrictedRegion("Região restrita " + contRestRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion, true, "RestrictedRegion");
+                RestrictedRegion atualRestRegion = new RestrictedRegion("Região restrita " + contRestRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion, true);
 
                 CriptografarDados criptografarRestRegion = new CriptografarDados(atualRestRegion);
                 criptografarRestRegion.start();
                 try {
                     criptografarRestRegion.join();  // Aguarda a conclusão da thread de criptografia
-                    String RestregionJsonCriptografada = criptografarRestRegion.getEncryptedJson();  // Obtém o resultado após a conclusão
+                    RestrictedRegion RestregionJsonCriptografada = criptografarRestRegion.getRRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(RestregionJsonCriptografada);  // Adiciona a string criptografada à fila
                 } catch (InterruptedException e) {
                     System.err.println("Thread interrompida: " + e.getMessage());
@@ -222,37 +230,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
 
-            private void addRegionFila(String region) {
+            private void addRegionFila(Region region) {
                 Thread adicionarNaFila = new AdicionarFila(filaDeRegions, region, semaphore);
                 adicionarNaFila.start();
                 try {
                     adicionarNaFila.join();
-                    Region regionDescriptografada = null;
-                    try {
-                        DescriptografarDados descriptografarDados = new DescriptografarDados(region);
-                        descriptografarDados.start();
-                        descriptografarDados.join();  // Aguarda a conclusão da thread de descriptografia
-                        regionDescriptografada = descriptografarDados.getDecryptedJson();  // Obtém o resultado após a conclusão
-
-                        String tipoRegion = "Tipo não identificado";
-                        if ("SubRegion".equals(regionDescriptografada.getType())) {
-                            tipoRegion = "Sub Região";
-                        } else if ("RestrictedRegion".equals(regionDescriptografada.getType())) {
-                            tipoRegion = "Região Restrita";
-                        }else if("Region".equals(regionDescriptografada.getType())){
-                            tipoRegion = "Região";
-                        }
-                        String finalTipoRegion = tipoRegion;
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, finalTipoRegion + " cadastrada!", Toast.LENGTH_LONG).show());
-                    } catch (InterruptedException e) {
-                        System.err.println("Thread interrompida: " + e.getMessage());
-                        e.printStackTrace();
+                    String tipoRegion;
+                    if (region instanceof SubRegion) {
+                        tipoRegion = "SubRegião";
+                    } else if (region instanceof RestrictedRegion) {
+                        tipoRegion = "Região Restrita";
+                    } else {
+                        tipoRegion = "Região";
                     }
+
+                    String finalTipoRegion = tipoRegion;
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, finalTipoRegion + " cadastrada!", Toast.LENGTH_LONG).show());
                 } catch (InterruptedException e) {
+                    System.err.println("Thread interrompida: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
-
         });
 
         GravarBdButtom.setOnClickListener(v -> {
