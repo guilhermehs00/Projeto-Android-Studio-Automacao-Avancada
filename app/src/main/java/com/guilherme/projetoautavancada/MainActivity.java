@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         break;
                     default:
                         runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, "(Região / Sub Região / Região Restrita) já cadastrada!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, "Sub Região ou Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
                         });
                         break;
                 }
@@ -189,14 +189,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     CriptografarDados criptografarSubRegion = new CriptografarDados(atualSubRegion);
                     criptografarSubRegion.start();
-                    try {
-                        criptografarSubRegion.join();  // Aguarda a conclusão da thread de criptografia
-                        SubRegion SubregionJsonCriptografada = criptografarSubRegion.getSRegionEncryptedJson();  // Obtém o resultado após a conclusão
-                        addRegionFila(SubregionJsonCriptografada);  // Adiciona a string criptografada à fila
-                    } catch (InterruptedException e) {
-                        System.err.println("Thread interrompida: " + e.getMessage());
-                        e.printStackTrace();
-                    }
+
+                    criptografarSubRegion.join();  // Aguarda a conclusão da thread de criptografia
+                    SubRegion SubregionJsonCriptografada = criptografarSubRegion.getSRegionEncryptedJson();  // Obtém o resultado após a conclusão
+                    addRegionFila(SubregionJsonCriptografada);  // Adiciona a string criptografada à fila
+
                 } catch (Exception e) {
                     // Trata a exceção, tal como exibindo um erro ou registrando em logs
                     System.err.println("\n\nErro ao criptografar os dados: " + e.getMessage() + "\n\n");
@@ -205,15 +202,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             private void addNewRestrictedRegion() {
-                contRestRegion++;
-                RestrictedRegion atualRestRegion = new RestrictedRegion("Região restrita " + contRestRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion, true);
-
-                CriptografarDados criptografarRestRegion = new CriptografarDados(atualRestRegion);
-                criptografarRestRegion.start();
                 try {
+                    contRestRegion++;
+                    RestrictedRegion atualRestRegion = new RestrictedRegion("Região restrita " + contRestRegion + " da " + auxRegion.getName(), latitudeAtual, longitudeAtual, userId, auxRegion, true);
+
+                    CriptografarDados criptografarRestRegion = new CriptografarDados(atualRestRegion);
+                    criptografarRestRegion.start();
+
                     criptografarRestRegion.join();  // Aguarda a conclusão da thread de criptografia
                     RestrictedRegion RestregionJsonCriptografada = criptografarRestRegion.getRRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(RestregionJsonCriptografada);  // Adiciona a string criptografada à fila
+
                 } catch (InterruptedException e) {
                     System.err.println("Thread interrompida: " + e.getMessage());
                     e.printStackTrace();
