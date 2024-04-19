@@ -36,12 +36,12 @@ android {
 
 dependencies {
 
+    implementation("com.guilherme:bibliotecacalculosautavancada:1.1")
     implementation(libs.play.services.location)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(project(":mylibrary"))
     implementation(libs.play.services.maps)
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
     implementation("com.google.firebase:firebase-analytics")

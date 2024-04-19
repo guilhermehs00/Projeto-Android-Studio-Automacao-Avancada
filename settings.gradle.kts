@@ -17,6 +17,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven{
+            url = uri("https://maven.pkg.github.com/guilhermehs00/Projeto-Android-Studio-Automacao-Avancada")
+            credentials{
+                username = "guilhermehs00"
+                password = "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"
+            }
+        }
     }
 
 }

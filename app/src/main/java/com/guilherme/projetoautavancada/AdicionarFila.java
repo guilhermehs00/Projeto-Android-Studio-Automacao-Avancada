@@ -1,9 +1,9 @@
 package com.guilherme.projetoautavancada;
 
-import com.guilherme.mylibrary.Region;
 
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
+import com.guilherme.mylibrary.*;
 
 public class AdicionarFila extends Thread {
     private final Queue<Region> filaDeRegion;

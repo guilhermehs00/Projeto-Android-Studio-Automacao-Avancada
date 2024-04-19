@@ -30,9 +30,9 @@ publishing {
     publications {
         create<MavenPublication>("minhapublication") {
             groupId = "com.guilherme"
-            artifactId = "projetoavancada"
-            version = "1.0"
-            artifact("$buildDir/outputs/aar/mylibrary-release.aar")
+            artifactId = "bibliotecacalculosautavancada"
+            version = "1.1"
+            artifact("build/outputs/aar/mylibrary-release.aar")
         }
     }
     repositories{
