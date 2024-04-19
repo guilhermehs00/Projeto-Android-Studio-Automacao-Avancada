@@ -22,7 +22,6 @@ public class DescriptografarDados extends Thread {
 
     // Contrutor para decriptografar Região
     public DescriptografarDados(Region regionCriptografada) {
-        System.out.println("Descripitografando Region");
         this.regionCriptografada = regionCriptografada;
         this.SregionCriptografada = null;
         this.RregionCriptografada = null;
@@ -30,7 +29,6 @@ public class DescriptografarDados extends Thread {
 
     // Contrutor para decriptografar SubRegião
     public DescriptografarDados(SubRegion SregionCriptografada) {
-        System.out.println("Descripitografando uma SubRegion");
         this.regionCriptografada = null;
         this.SregionCriptografada = SregionCriptografada;
         this.RregionCriptografada = null;
@@ -38,7 +36,6 @@ public class DescriptografarDados extends Thread {
 
     // Contrutor para decriptografar Região Restrita
     public DescriptografarDados(RestrictedRegion RregionCriptografada) {
-        System.out.println("Descripitografando uma RestritaRegion");
         this.regionCriptografada = null;
         this.SregionCriptografada = null;
         this.RregionCriptografada = RregionCriptografada;

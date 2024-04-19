@@ -57,9 +57,9 @@ public class Region {
     }
 
     public boolean distance(double lat1, double long1, double lat2, double long2){
-        System.out.println("\nCalculando distancia dentro da Region\n");
         float[] results = new float[1];
         Location.distanceBetween(lat1, long1, lat2, long2, results);
+        System.out.printf("\nCalculando distancia dentro da Region\nDistância: %.2f metros\n", results[0]);
         return results[0] < 30;
     }
 
