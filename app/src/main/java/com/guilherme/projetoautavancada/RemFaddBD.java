@@ -58,17 +58,17 @@ public class RemFaddBD extends Thread {
 
             String nomeDoc = " ";
             if (regionDescriptografada != null) {
-                nomeDoc = regionDescriptografada.getName();
+                nomeDoc = regionDescriptografada.getName() + " | " + regionDescriptografada.getUser();
             } else if (sregionDescriptografada != null) {
-                nomeDoc = sregionDescriptografada.getName();
+                nomeDoc = sregionDescriptografada.getName() + " | " + sregionDescriptografada.getUser();
             } else if (rregionDescriptografada != null) {
-                nomeDoc = rregionDescriptografada.getName();
+                nomeDoc = rregionDescriptografada.getName() + " | " + rregionDescriptografada.getUser();
             }
 
             // Grava no Firestore
             DocumentReference docRef = db.collection("Regiões").document(nomeDoc);
             docRef.set(r.serialize()).addOnSuccessListener(aVoid -> {
-                handler.post(() -> labelsizeFila.setText("Regiões na fila: " + filaDeRegion.size()));
+                handler.post(() -> labelsizeFila.setText(String.format("%d Regiões na fila!",filaDeRegion.size())));
             }).addOnFailureListener(e -> {
                 handler.post(() -> Toast.makeText(context, "Erro ao gravar no BD: " + e.getMessage(), Toast.LENGTH_LONG).show());
             });
