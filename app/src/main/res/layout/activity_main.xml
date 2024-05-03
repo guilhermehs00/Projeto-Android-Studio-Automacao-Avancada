@@ -2,20 +2,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:backgroundTint="#FFFFFF"
-    android:backgroundTintMode="screen"
     android:foregroundTint="#FFFFFF">
 
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="top" />
 
     <Button
         android:id="@+id/botaoCamada"
         android:layout_width="50dp"
-        android:layout_height="49dp"
+        android:layout_height="50dp"
         android:layout_marginLeft="339dp"
         android:layout_marginTop="65dp"
         android:backgroundTint="#00002877"
@@ -23,15 +22,30 @@
         app:iconGravity="textStart"
         app:iconPadding="0dp"
         app:iconSize="40dp"
-        app:iconTint="#FF0000" />
+        app:iconTint="#FF0000"
+        android:contentDescription="Alterar tipo de camada do mapa" />
+
+    <Button
+        android:id="@+id/botaoLimparFila"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="339dp"
+        android:layout_marginTop="630dp"
+        android:backgroundTint="#00000000"
+        app:icon="@drawable/delete"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="43dp"
+        app:iconTint="#FF0000"
+        android:contentDescription="Limpar todos os marcadores da fila" />
 
     <TextView
         android:id="@+id/userNameTextView"
-        android:layout_width="85dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="2dp"
         android:layout_marginTop="0dp"
-        android:background="#AA000000"
+        android:background="#00000000"
         android:text="Nome do Usuário"
         android:textColor="#FF0000"
         android:textSize="16sp"
@@ -41,11 +55,11 @@
 
     <TextView
         android:id="@+id/userIdTextView"
-        android:layout_width="85dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="2dp"
         android:layout_marginTop="21dp"
-        android:background="#AA000000"
+        android:background="#00000000"
         android:text="Id do Usuario"
         android:textColor="#FF0000"
         android:textSize="16dp"
@@ -59,31 +73,31 @@
         android:orientation="vertical">
 
         <TextView
-                android:id="@+id/labelsizeFila"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Regiões na fila: 0"
-                android:textAlignment="center"
-                android:textColor="#F40000"
-                android:textStyle="bold" />
+            android:id="@+id/labelsizeFila"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Regiões na fila: 0"
+            android:textAlignment="center"
+            android:textColor="#F40000"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/latitudeTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Latitude: "
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
-                android:textStyle="bold" />
+        <TextView
+            android:id="@+id/latitudeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Latitude: "
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/longitudeTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Longitude: "
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
-                android:textStyle="bold" />
+        <TextView
+            android:id="@+id/longitudeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Longitude: "
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -93,12 +107,12 @@
             <Button
                 android:id="@+id/addRegionButton"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:backgroundTint="#020202"
                 android:text="Adicionar Região"
                 android:textColor="#FFFFFF"
-                android:textSize="25sp" />
+                android:textSize="20sp" />
 
             <Button
                 android:id="@+id/GravarBdButtom"
@@ -108,7 +122,7 @@
                 android:backgroundTint="#020202"
                 android:text="Gravar no BD"
                 android:textColor="#FFFFFF"
-                android:textSize="25sp" />
+                android:textSize="20sp" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>
