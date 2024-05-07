@@ -36,13 +36,12 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyCallback {
 
-    private final Semaphore semaphore = new Semaphore(1);
-    private GoogleMap mMap;
-    private Marker currentMarker;
+    // Constantes
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
+    // Componentes da Interface do Usuário
     private TextView latitudeTextView;
     private TextView longitudeTextView;
     private TextView userNameTextView;
@@ -51,25 +50,51 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button addRegionButton;
     private Button GravarBdButtom;
     private Button botaoCamada;
+    private Button botaoLimparFila;
 
+    // Componentes do Mapa
+    private GoogleMap mMap;
+    private Marker currentMarker;
+    private Marker regionextra;
+
+    // Dados do Usuário e Localização
     private double latitudeAtual = 0.0;
     private double longitudeAtual = 0.0;
-    private Queue<Region> filaDeRegions = new LinkedList<>();
+    private int userId;
+    private String userName;
+
+    // Gerenciamento de Regiões
+    private final Queue<Region> filaDeRegions = new LinkedList<>();
     private int contRegion = 0;
     private int contSubRegion = 0;
     private int contRestRegion = 0;
     private boolean ultimaAddSub = false;
+    private Region auxRegion;
+
+    // Medição de Desempenho
+    private double timeUltimaLerDados;
+    private long tempo_inicio_atividade;
+    public double Time_T1;
+    public double Time_T4;
+    public double Time_T5;
+
+    // Concorrência e Armazenamento
+    private final Semaphore semaphore = new Semaphore(1);
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    // SharedPreferences para armazenamento de configurações ou dados do usuário
     private SharedPreferences sharedPreferences;
-    private int  userId;
-    private String userName;
-    private Handler uiHandler = new Handler(Looper.getMainLooper());
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    public Region auxRegion = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Forçar a aplicação a usar apenas o núcleo 0
+        // int coreNumber = 0; // Escolha o núcleo que você deseja usar
+        //int mask = 1 << coreNumber; // Cria uma máscara para o núcleo escolhido
+        //Process.setThreadAffinityMask(Process.myTid(), mask); // Aplica a máscara ao thread atual
 
         userNameTextView = findViewById(R.id.userNameTextView);
         userIdTextView = findViewById(R.id.userIdTextView);
@@ -79,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addRegionButton = findViewById(R.id.addRegionButton);
         GravarBdButtom = findViewById(R.id.GravarBdButtom);
         botaoCamada = findViewById(R.id.botaoCamada);
+        botaoLimparFila = findViewById(R.id.botaoLimparFila);
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
         // Verifique se é a primeira execução
@@ -103,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Se os dados não forem encontrados na Intent, tenta recuperar das SharedPreferences
         if (userName == null || userName.isEmpty() || userId == -1) {
-            userName = sharedPreferences.getString("NomeUsuario", "Nome de Usuário não disponível");
+            userName = sharedPreferences.getString("NomeUsuario", "Nome de Usuário indisponível");
             userId = sharedPreferences.getInt("IdUsuario", -1); // -1 indica que o ID não está disponível
         }
 
@@ -117,6 +143,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addRegionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AnimarBotton.aplicarPulsacao(v);
+                //System.out.println("\nComputação LerDados: "+ timeUltimaLerDados + " segundos.");
+                Time_T1 = timeUltimaLerDados;
+                if (Time_T1 > 0.45){
+                    System.out.println("\nT1 NÃO É ESCALONÁVEL: " + Time_T1 + " segundos...\n");
+                }else{
+                    System.out.println("\nT1 é escalonável: " + Time_T1 + " segundos...\n");
+                }
+
+                tempo_inicio_atividade = System.nanoTime();
                 AtomicInteger contadorDeRespostas = new AtomicInteger(0);
                 AtomicBoolean RegProx = new AtomicBoolean(false);
                 AtomicBoolean SubRegProx = new AtomicBoolean(false);
@@ -135,11 +171,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 };
 
-                Thread consultaNaFila = new ConsultaFila(filaDeRegions, latitudeAtual, longitudeAtual, semaphore, callback, auxRegion);
-                Thread consultarBd = new ConsultaBD(db, latitudeAtual, longitudeAtual, callback, auxRegion);
+                Thread consultaNaFila = new ConsultaFila(filaDeRegions, latitudeAtual, longitudeAtual, semaphore, callback, auxRegion, tempo_inicio_atividade);
+                Thread consultarBd = new ConsultaBD(db, latitudeAtual, longitudeAtual, callback, auxRegion, tempo_inicio_atividade);
 
-                consultaNaFila.start();
                 consultarBd.start();
+                consultaNaFila.start();
             }
 
             private void partiuAddRegion(AtomicBoolean RegProx, AtomicBoolean SubRegProx, AtomicBoolean RestRegProx) {
@@ -151,12 +187,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         break;
                     case "101": // Há Região, não há SubRegião, há Região Restrita
                         runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, "Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AtividadePrincipal.this, "Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
                         });
                         break;
                     case "110": // Há Região, há SubRegião, não há Região Restrita
                         runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, "Sub Região já cadastrada!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AtividadePrincipal.this, "Sub Região já cadastrada!", Toast.LENGTH_LONG).show();
                         });
                         break;
                     case "100": // Há Região, não há SubRegião, não há Região Restrita
@@ -164,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         break;
                     default:
                         runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, "Sub Região ou Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AtividadePrincipal.this, "Sub Região ou Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
                         });
                         break;
                 }
@@ -183,6 +219,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     CriptografarDados criptografarRegion = new CriptografarDados(atualRegion);
                     criptografarRegion.start();
                     criptografarRegion.join();  // Aguarda a conclusão da thread de criptografia
+
+                    Time_T4 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
+                    if (Time_T4 > 0.9){
+                        System.out.println("T4 NÃO É ESCALONÁVEL: " + Time_T4 + " segundos...\n");
+                    }else{
+                        System.out.println("T4 é escalonável: " + Time_T4 + " segundos...\n");
+                    }
 
                     Region regionJsonCriptografada = criptografarRegion.getRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(regionJsonCriptografada);  // Adiciona a Region criptografada à fila
@@ -207,11 +250,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     criptografarSubRegion.start();
                     criptografarSubRegion.join();  // Aguarda a conclusão da thread de criptografia
 
+                    Time_T4 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
+                    if (Time_T4 > 0.9){
+                        System.out.println("T4 NÃO É ESCALONÁVEL: " + Time_T4 + " segundos...\n");
+                    }else{
+                        System.out.println("T4 é escalonável: " + Time_T4 + " segundos...\n");
+                    }
+
                     SubRegion SubregionJsonCriptografada = criptografarSubRegion.getSRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(SubregionJsonCriptografada);  // Adiciona a string criptografada à fila
 
                 } catch (Exception e) {
-                    // Trata a exceção, tal como exibindo um erro ou registrando em logs
                     System.err.println("\n\nErro ao criptografar os dados: " + e.getMessage() + "\n\n");
                     e.printStackTrace();
                 }
@@ -233,8 +282,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     criptografarRestRegion.start();
                     criptografarRestRegion.join();  // Aguarda a conclusão da thread de criptografia
 
+                    Time_T4 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
+                    if (Time_T4 > 0.9){
+                        System.out.println("T4 NÃO É ESCALONÁVEL: " + Time_T4 + " segundos...\n");
+                    }else{
+                        System.out.println("T4 é escalonável: " + Time_T4 + " segundos...\n");
+                    }
+
                     RestrictedRegion RestregionJsonCriptografada = criptografarRestRegion.getRRegionEncryptedJson();  // Obtém o resultado após a conclusão
-                    addRegionFila(RestregionJsonCriptografada);  // Adiciona a string criptografada à fila
+                    addRegionFila(RestregionJsonCriptografada);  // Adiciona a Rest region criptografada à fila
 
                 } catch (InterruptedException e) {
                     System.err.println("Thread interrompida: " + e.getMessage());
@@ -258,6 +314,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     adicionarNaFila.start();
                     adicionarNaFila.join();
 
+
+                    Time_T5 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
+                    if (Time_T5 > 1.0){
+                        System.out.println("T5 NÃO É ESCALONÁVEL: " + Time_T5 + " segundos...\n");
+                    }else{
+                        System.out.println("T5 é escalonável: " + Time_T5 + " segundos...\n");
+                    }
+                    System.out.println("Terminou a Atividade...\n\n");
                     String tipoRegion;
                     if (region instanceof SubRegion) {
                         tipoRegion = "SubRegião";
@@ -268,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
 
                     String finalTipoRegion = tipoRegion;
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, finalTipoRegion + " cadastrada!", Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(AtividadePrincipal.this, finalTipoRegion + " cadastrada!", Toast.LENGTH_LONG).show());
                 } catch (InterruptedException e) {
                     System.err.println("Thread interrompida: " + e.getMessage());
                     e.printStackTrace();
@@ -277,13 +341,60 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         GravarBdButtom.setOnClickListener(v -> {
-            RemFaddBD threadRemoverDaFila = new RemFaddBD(db, filaDeRegions, semaphore, uiHandler, MainActivity.this, labelsizeFila);
+            AnimarBotton.aplicarPulsacao(v);
+            RemFaddBD threadRemoverDaFila = new RemFaddBD(db, filaDeRegions, semaphore, uiHandler, AtividadePrincipal.this, labelsizeFila);
             threadRemoverDaFila.start();
+        });
+
+        botaoLimparFila.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AnimarBotton.aplicarPulsacao(v);
+                try {
+                    semaphore.acquire();
+                    synchronized (filaDeRegions) {
+                        if(!filaDeRegions.isEmpty()){
+                            filaDeRegions.remove();
+                        }else{
+                            runOnUiThread(() ->Toast.makeText(AtividadePrincipal.this, "Fila vazia...", Toast.LENGTH_LONG).show());
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    semaphore.release();
+                }
+                labelsizeFila.setText(String.format("%d Regiões na fila!", filaDeRegions.size()));
+            }
+        });
+
+        botaoLimparFila.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AnimarBotton.aplicarPulsacaoLong(v);
+                try {
+                    semaphore.acquire();
+                    synchronized (filaDeRegions) {
+                        if (filaDeRegions.isEmpty()) {
+                            runOnUiThread(() -> Toast.makeText(AtividadePrincipal.this, "Fila vazia...", Toast.LENGTH_SHORT).show());
+                        } else {
+                            filaDeRegions.clear();
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    semaphore.release();
+                }
+                labelsizeFila.setText(String.format("%d Regiões na fila!", filaDeRegions.size()));
+                return true;
+            }
         });
 
         botaoCamada.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AnimarBotton.aplicarPulsacao(v);
                 if (mMap != null) {
                     // Alternar entre os tipos de mapa
                     if (mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
@@ -295,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         // Solicitar permissões de localização em tempo de execução
@@ -307,25 +418,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void updateLocationUI(double latitude, double longitude) {
+    public void atualizarLocalization(double latitude, double longitude, long tempo_inicio) {
         latitudeAtual = latitude;
         longitudeAtual = longitude;
-        latitudeTextView.setText(String.format("Latitude: %.6f", latitude));
-        longitudeTextView.setText(String.format("Longitude: %.6f", longitude));
-        labelsizeFila.setText("Regiões na fila: " + filaDeRegions.size());
+        timeUltimaLerDados = ((System.nanoTime() - tempo_inicio)/1_000_000_000.0);
+        System.out.println(timeUltimaLerDados);
+        latitudeTextView.setText(String.format("Latitude: %.6f", latitudeAtual));
+        longitudeTextView.setText(String.format("Longitude: %.6f", longitudeAtual));
+        labelsizeFila.setText(String.format("%d Regiões na fila!",filaDeRegions.size()));
 
         // Remove o marcador anterior, se houver
         if (currentMarker != null) {
             currentMarker.remove();
         }
 
-        // Cria um novo objeto LatLng para a localização atualizada
-        LatLng latLng = new LatLng(latitude, longitude);
-
         // Adicionar um novo marcador na localização atual
-        currentMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+        currentMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitudeAtual, longitudeAtual))
                 .title("Localização Atual"));
-
     }
 
     @Override
@@ -333,15 +442,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                new LerDadosGps(this).start();
+                inicializaRecursosLocalizacao(); // Inicializa recursos de GPS e mapa
             } else {
+                // Exibe um diálogo de alerta se a permissão não for concedida
                 new AlertDialog.Builder(this)
                         .setTitle("Permissão de Localização Necessária")
-                        .setMessage("Esta aplicação precisa da permissão de localização para adicionar regiões." +
-                                " Por favor, conceda a permissão nas configurações do aplicativo.")
+                        .setMessage("Esta aplicação precisa da permissão de localização para adicionar regiões. Por favor, conceda a permissão nas configurações do aplicativo.")
                         .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                         .create().show();
             }
+        }
+    }
+
+    private void inicializaRecursosLocalizacao() {
+        new LerDadosGps(this).start(); // Inicia a thread de dados de GPS
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true); // Ativa a camada de localização no mapa
+            FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(this);
+            locationClient.getLastLocation().addOnSuccessListener(this, location -> {
+                if (location != null) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+                }
+            });
         }
     }
 
@@ -352,6 +475,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
 
+            // Adiciona o listener de Long Press no mapa
+            mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                @Override
+                public void onMapLongClick(LatLng latLng) {
+                    // Aqui você pode adicionar um marcador ao mapa na localização long press
+                    addMarker(latLng);
+                }
+            });
+
             FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(this);
             locationClient.getLastLocation().addOnSuccessListener(this, location -> {
                 if (location != null) {
@@ -359,5 +491,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
         }
+    }
+    private void addMarker(LatLng latLng) {
+        // Se já existir um marcador no mapa, remove-o
+        if (regionextra != null) {
+            regionextra.remove();
+        }
+
+        // Cria um marcador com as opções de configuração
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                .title("Região Marcada")
+                .snippet(String.format("Latitude: %.6f, Longitude: %.6f" ,latLng.latitude, latLng.longitude));
+
+        // Adiciona o marcador ao mapa e atualiza a referência do marcador atual
+        regionextra = mMap.addMarker(markerOptions);
+        atualizarLocalization(latLng.latitude, latLng.longitude, 0);
     }
 }

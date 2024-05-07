@@ -1,6 +1,5 @@
 package com.guilherme.projetoautavancada;
 
-
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import com.guilherme.mylibrary.*;
@@ -10,6 +9,9 @@ public class AdicionarFila extends Thread {
     private Region region;
     private final Semaphore semaphore;
 
+    //private long tempo_inicio;
+    //private long tempo_fim;
+
     public AdicionarFila(Queue<Region> filaDeRegion, Region region, Semaphore semaphore) {
         this.filaDeRegion = filaDeRegion;
         this.region = region;
@@ -18,6 +20,7 @@ public class AdicionarFila extends Thread {
 
     @Override
     public void run() {
+        //tempo_inicio = System.nanoTime();
         try {
             semaphore.acquire();
             synchronized (filaDeRegion) {
@@ -28,5 +31,7 @@ public class AdicionarFila extends Thread {
         } finally {
             semaphore.release();
         }
+        //tempo_fim = System.nanoTime();
+        //.out.println("Computação Adicionar na Fila: " + ((tempo_fim - tempo_inicio)/1_000_000_000.0) + " segundos.");
     }
 }
