@@ -10,6 +10,8 @@ public class LerDadosGps extends Thread {
     private final Context context;
     private final FusedLocationProviderClient locationClient;
 
+    public long tempo_inicio_LerDados;
+
     public LerDadosGps(Context context) {
         this.context = context;
         this.locationClient = LocationServices.getFusedLocationProviderClient(context);
@@ -18,15 +20,16 @@ public class LerDadosGps extends Thread {
     @SuppressLint("MissingPermission")
     @Override
     public void run() {
-        while (true) { // atualizar a localização
+        while (true) {
+            /*System.out.println("\nComeçou a Atividade...");*/tempo_inicio_LerDados = System.nanoTime();
             locationClient.getLastLocation().addOnSuccessListener(location -> {
                 if (location != null) {
-                    ((MainActivity)context).runOnUiThread(() -> {
-                        ((MainActivity)context).updateLocationUI(location.getLatitude(), location.getLongitude());
+                    ((AtividadePrincipal)context).runOnUiThread(() -> {
+                        ((AtividadePrincipal)context).atualizarLocalization(location.getLatitude(), location.getLongitude(), tempo_inicio_LerDados);
                     });
                 }
             });
-           try {
+            try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();

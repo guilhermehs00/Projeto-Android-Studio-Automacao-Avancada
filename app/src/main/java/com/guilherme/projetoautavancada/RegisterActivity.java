@@ -30,7 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
             editor.apply();
 
             // Inicie a MainActivity ou outra atividade como destino após o registro
-            Intent iniciaMain = new Intent(RegisterActivity.this, MainActivity.class);
+            Intent iniciaMain = new Intent(RegisterActivity.this, AtividadePrincipal.class);
             startActivity(iniciaMain);
             finish(); // Finaliza a RegisterActivity
         });

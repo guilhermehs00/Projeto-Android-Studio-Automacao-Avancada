@@ -1,5 +1,7 @@
 package com.guilherme.projetoautavancada;
 
+import static java.lang.String.*;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,7 +12,7 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.os.Process;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -47,6 +49,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     private TextView userNameTextView;
     private TextView userIdTextView;
     private TextView labelsizeFila;
+    private TextView notification;
     private Button addRegionButton;
     private Button GravarBdButtom;
     private Button botaoCamada;
@@ -55,7 +58,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     // Componentes do Mapa
     private GoogleMap mMap;
     private Marker currentMarker;
-    private Marker regionextra;
 
     // Dados do Usuário e Localização
     private double latitudeAtual = 0.0;
@@ -91,7 +93,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Forçar a aplicação a usar apenas o núcleo 0
+        //Forçar a aplicação a usar apenas o núcleo 0
         // int coreNumber = 0; // Escolha o núcleo que você deseja usar
         //int mask = 1 << coreNumber; // Cria uma máscara para o núcleo escolhido
         //Process.setThreadAffinityMask(Process.myTid(), mask); // Aplica a máscara ao thread atual
@@ -101,6 +103,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         latitudeTextView = findViewById(R.id.latitudeTextView);
         longitudeTextView = findViewById(R.id.longitudeTextView);
         labelsizeFila = findViewById(R.id.labelsizeFila);
+        notification = findViewById(R.id.notification);
         addRegionButton = findViewById(R.id.addRegionButton);
         GravarBdButtom = findViewById(R.id.GravarBdButtom);
         botaoCamada = findViewById(R.id.botaoCamada);
@@ -135,7 +138,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
 
         userNameTextView.setText(userName);
         if (userId != -1) {
-            userIdTextView.setText(String.valueOf(userId));
+            userIdTextView.setText(valueOf(userId));
         } else {
             userIdTextView.setText("ID não disponível");
         }
@@ -187,12 +190,16 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                         break;
                     case "101": // Há Região, não há SubRegião, há Região Restrita
                         runOnUiThread(() -> {
-                            Toast.makeText(AtividadePrincipal.this, "Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
+                            notification.setText("Região Restrita existente! \u26A0\uFE0F");
+                            notification.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
                         });
                         break;
                     case "110": // Há Região, há SubRegião, não há Região Restrita
                         runOnUiThread(() -> {
-                            Toast.makeText(AtividadePrincipal.this, "Sub Região já cadastrada!", Toast.LENGTH_LONG).show();
+                            notification.setText("Sub Região existente! \u26A0\uFE0F");
+                            notification.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
                         });
                         break;
                     case "100": // Há Região, não há SubRegião, não há Região Restrita
@@ -200,7 +207,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                         break;
                     default:
                         runOnUiThread(() -> {
-                            Toast.makeText(AtividadePrincipal.this, "Sub Região ou Região Restrita já cadastrada!", Toast.LENGTH_LONG).show();
+                            notification.setText("Região existente! \u26A0\uFE0F");
+                            notification.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
                         });
                         break;
                 }
@@ -314,14 +323,13 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     adicionarNaFila.start();
                     adicionarNaFila.join();
 
-
                     Time_T5 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
                     if (Time_T5 > 1.0){
                         System.out.println("T5 NÃO É ESCALONÁVEL: " + Time_T5 + " segundos...\n");
                     }else{
                         System.out.println("T5 é escalonável: " + Time_T5 + " segundos...\n");
                     }
-                    System.out.println("Terminou a Atividade...\n\n");
+
                     String tipoRegion;
                     if (region instanceof SubRegion) {
                         tipoRegion = "SubRegião";
@@ -332,7 +340,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     }
 
                     String finalTipoRegion = tipoRegion;
-                    runOnUiThread(() -> Toast.makeText(AtividadePrincipal.this, finalTipoRegion + " cadastrada!", Toast.LENGTH_LONG).show());
+                    notification.setText(finalTipoRegion + " Adicionada! \u2705");
+                    notification.setVisibility(View.VISIBLE);
+                    new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
                 } catch (InterruptedException e) {
                     System.err.println("Thread interrompida: " + e.getMessage());
                     e.printStackTrace();
@@ -342,7 +352,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
 
         GravarBdButtom.setOnClickListener(v -> {
             AnimarBotton.aplicarPulsacao(v);
-            RemFaddBD threadRemoverDaFila = new RemFaddBD(db, filaDeRegions, semaphore, uiHandler, AtividadePrincipal.this, labelsizeFila);
+            RemFaddBD threadRemoverDaFila = new RemFaddBD(db, filaDeRegions, semaphore, uiHandler, AtividadePrincipal.this, notification);
             threadRemoverDaFila.start();
         });
 
@@ -356,7 +366,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                         if(!filaDeRegions.isEmpty()){
                             filaDeRegions.remove();
                         }else{
-                            runOnUiThread(() ->Toast.makeText(AtividadePrincipal.this, "Fila vazia...", Toast.LENGTH_LONG).show());
+                            notification.setText("Fila vazia...");
+                            notification.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
                         }
                     }
                 } catch (InterruptedException e) {
@@ -364,7 +376,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 } finally {
                     semaphore.release();
                 }
-                labelsizeFila.setText(String.format("%d Regiões na fila!", filaDeRegions.size()));
+                labelsizeFila.setText(format("%d Regiões na fila!", filaDeRegions.size()));
             }
         });
 
@@ -376,7 +388,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     semaphore.acquire();
                     synchronized (filaDeRegions) {
                         if (filaDeRegions.isEmpty()) {
-                            runOnUiThread(() -> Toast.makeText(AtividadePrincipal.this, "Fila vazia...", Toast.LENGTH_SHORT).show());
+                            notification.setText("Fila vazia...");
+                            notification.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
                         } else {
                             filaDeRegions.clear();
                         }
@@ -386,7 +400,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 } finally {
                     semaphore.release();
                 }
-                labelsizeFila.setText(String.format("%d Regiões na fila!", filaDeRegions.size()));
+                labelsizeFila.setText(format("%d Regiões na fila!", filaDeRegions.size()));
                 return true;
             }
         });
@@ -422,10 +436,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         latitudeAtual = latitude;
         longitudeAtual = longitude;
         timeUltimaLerDados = ((System.nanoTime() - tempo_inicio)/1_000_000_000.0);
-        System.out.println(timeUltimaLerDados);
-        latitudeTextView.setText(String.format("Latitude: %.6f", latitudeAtual));
-        longitudeTextView.setText(String.format("Longitude: %.6f", longitudeAtual));
-        labelsizeFila.setText(String.format("%d Regiões na fila!",filaDeRegions.size()));
+        latitudeTextView.setText(format("Latitude: %.6f", latitudeAtual));
+        longitudeTextView.setText(format("Longitude: %.6f", longitudeAtual));
+        labelsizeFila.setText(format("%d Regiões na fila!",filaDeRegions.size()));
 
         // Remove o marcador anterior, se houver
         if (currentMarker != null) {
@@ -475,15 +488,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
 
-            // Adiciona o listener de Long Press no mapa
-            mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-                @Override
-                public void onMapLongClick(LatLng latLng) {
-                    // Aqui você pode adicionar um marcador ao mapa na localização long press
-                    addMarker(latLng);
-                }
-            });
-
             FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(this);
             locationClient.getLastLocation().addOnSuccessListener(this, location -> {
                 if (location != null) {
@@ -492,20 +496,5 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
             });
         }
     }
-    private void addMarker(LatLng latLng) {
-        // Se já existir um marcador no mapa, remove-o
-        if (regionextra != null) {
-            regionextra.remove();
-        }
 
-        // Cria um marcador com as opções de configuração
-        MarkerOptions markerOptions = new MarkerOptions()
-                .position(latLng)
-                .title("Região Marcada")
-                .snippet(String.format("Latitude: %.6f, Longitude: %.6f" ,latLng.latitude, latLng.longitude));
-
-        // Adiciona o marcador ao mapa e atualiza a referência do marcador atual
-        regionextra = mMap.addMarker(markerOptions);
-        atualizarLocalization(latLng.latitude, latLng.longitude, 0);
-    }
 }

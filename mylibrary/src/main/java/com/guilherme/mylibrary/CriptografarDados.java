@@ -20,6 +20,9 @@ public class CriptografarDados extends Thread {
     private String mainRegionJsonCriptografada;
     private String restrictedJsonCriptografada;
 
+    //private long tempo_inicio;
+    //private long tempo_fim;
+
     // Contrutor para criptografar uma Região
     public CriptografarDados(Region region) {
         this.region = region;
@@ -43,6 +46,7 @@ public class CriptografarDados extends Thread {
 
     @Override
     public void run() {
+        //tempo_inicio = System.nanoTime();
         try {
             if (region != null){
                 encryptMain(region);
@@ -97,6 +101,8 @@ public class CriptografarDados extends Thread {
             System.err.println("\n\nErro ao criptografar os dados: " + e.getMessage() + "\n\n");
             e.printStackTrace();
         }
+        //tempo_fim = System.nanoTime();
+        //System.out.println("Computação Criptografar: " + ((tempo_fim - tempo_inicio)/1_000_000_000.0) + " segundos.");
     }
 
     // Criptografa os atributos da super classe

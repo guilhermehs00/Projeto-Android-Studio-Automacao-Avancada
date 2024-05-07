@@ -46,6 +46,7 @@ public class DescriptografarDados extends Thread {
     public void run() {
         try {
             if (regionCriptografada != null) {
+
                 DescryptMain(regionCriptografada); // Descriptografa atributos principais
 
                 // Cria um novo objeto Region com os valores descriptografados

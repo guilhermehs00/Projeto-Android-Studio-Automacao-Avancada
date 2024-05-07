@@ -2,6 +2,7 @@ package com.guilherme.projetoautavancada;
 
 import android.content.Context;
 import android.os.Handler;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.guilherme.mylibrary.*;
@@ -17,16 +18,16 @@ public class RemFaddBD extends Thread {
     private final Semaphore semaphore;
     private final Handler handler;
     private final Context context;
-    private final TextView labelsizeFila;
+    private final TextView notification;
     private FirebaseFirestore db;
 
-    public RemFaddBD(FirebaseFirestore db, Queue<Region> filaDeRegion, Semaphore semaphore, Handler handler, Context context, TextView labelsizeFila) {
+    public RemFaddBD(FirebaseFirestore db, Queue<Region> filaDeRegion, Semaphore semaphore, Handler handler, Context context, TextView notification) {
         this.db = db;
         this.filaDeRegion = filaDeRegion;
         this.semaphore = semaphore;
         this.handler = handler;
         this.context = context;
-        this.labelsizeFila = labelsizeFila;
+        this.notification = notification;
     }
 
     @Override
@@ -68,7 +69,9 @@ public class RemFaddBD extends Thread {
             // Grava no Firestore
             DocumentReference docRef = db.collection("Regiões").document(nomeDoc);
             docRef.set(r.serialize()).addOnSuccessListener(aVoid -> {
-                handler.post(() -> labelsizeFila.setText(String.format("%d Regiões na fila!",filaDeRegion.size())));
+                notification.setText("Salvo no Firestore Database!");
+                notification.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(() -> notification.setVisibility(View.GONE), 1000);
             }).addOnFailureListener(e -> {
                 handler.post(() -> Toast.makeText(context, "Erro ao gravar no BD: " + e.getMessage(), Toast.LENGTH_LONG).show());
             });
