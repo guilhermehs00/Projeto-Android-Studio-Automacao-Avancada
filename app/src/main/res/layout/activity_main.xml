@@ -16,18 +16,90 @@
         android:layout_marginRight="5dp"
         android:layout_marginBottom="169dp" />
 
+    <LinearLayout
+        android:id="@+id/X"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/rounded_background"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/T1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="2dp"
+            android:text="T1"
+            android:textColor="#FF0101"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/T2"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="27dp"
+            android:text="T2"
+            android:textColor="#FF0101"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/T3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="27dp"
+            android:text="T3"
+            android:textColor="#FF0101"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/T4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="27dp"
+            android:text="T4"
+            android:textColor="#FF0101"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/T5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="27dp"
+            android:layout_marginBottom="2dp"
+            android:text="T5"
+            android:textColor="#FF0101"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:visibility="visible" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/notification"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_width="300dp"
+        android:layout_height="33dp"
         android:layout_gravity="bottom|center"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="179dp"
-        android:background="#000000"
+        android:background="@drawable/rounded_background"
+        android:elevation="4dp"
         android:textAlignment="center"
         android:textColor="#28FF00"
-        android:textSize="23sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:visibility="gone" />
 

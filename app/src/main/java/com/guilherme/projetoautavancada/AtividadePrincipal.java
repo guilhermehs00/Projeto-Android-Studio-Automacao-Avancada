@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Layout;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -50,6 +52,12 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     private TextView userIdTextView;
     private TextView labelsizeFila;
     private TextView notification;
+    private TextView T1;
+    private TextView T2;
+    private TextView T3;
+    private TextView T4;
+    private TextView T5;
+    private View X;
     private Button addRegionButton;
     private Button GravarBdButtom;
     private Button botaoCamada;
@@ -77,6 +85,8 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     private double timeUltimaLerDados;
     private long tempo_inicio_atividade;
     public double Time_T1;
+    private double Time_T2;
+    public double Time_T3;
     public double Time_T4;
     public double Time_T5;
 
@@ -108,6 +118,13 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         GravarBdButtom = findViewById(R.id.GravarBdButtom);
         botaoCamada = findViewById(R.id.botaoCamada);
         botaoLimparFila = findViewById(R.id.botaoLimparFila);
+        T1 = findViewById(R.id.T1);
+        T2 = findViewById(R.id.T2);
+        T3 = findViewById(R.id.T3);
+        T4 = findViewById(R.id.T4);
+        T5 = findViewById(R.id.T5);
+        X = findViewById(R.id.X);
+
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
         // Verifique se é a primeira execução
@@ -149,11 +166,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 AnimarBotton.aplicarPulsacao(v);
                 //System.out.println("\nComputação LerDados: "+ timeUltimaLerDados + " segundos.");
                 Time_T1 = timeUltimaLerDados;
-                if (Time_T1 > 0.45){
-                    System.out.println("\nT1 NÃO É ESCALONÁVEL: " + Time_T1 + " segundos...\n");
-                }else{
-                    System.out.println("\nT1 é escalonável: " + Time_T1 + " segundos...\n");
-                }
 
                 tempo_inicio_atividade = System.nanoTime();
                 AtomicInteger contadorDeRespostas = new AtomicInteger(0);
@@ -161,7 +173,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 AtomicBoolean SubRegProx = new AtomicBoolean(false);
                 AtomicBoolean RestRegProx = new AtomicBoolean(false);
 
-                CallbackConsulta callback = (existeRegProx, existeSubRegProx, existeRestRegProx, regionMain) -> {
+                CallbackConsulta callback = (existeRegProx, existeSubRegProx, existeRestRegProx, regionMain, time_2, time_3) -> {
+                    if(time_2 != 0.0) Time_T2 = time_2;
+                    if(time_3 != 0.0) Time_T3 = time_3;
                     if (existeRegProx) {
                         RegProx.set(true);
                         auxRegion = regionMain;
@@ -182,6 +196,8 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
             }
 
             private void partiuAddRegion(AtomicBoolean RegProx, AtomicBoolean SubRegProx, AtomicBoolean RestRegProx) {
+
+
                 String chave = (RegProx.get() ? "1" : "0") + (SubRegProx.get() ? "1" : "0") + (RestRegProx.get() ? "1" : "0");
 
                 switch (chave) {
@@ -230,11 +246,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     criptografarRegion.join();  // Aguarda a conclusão da thread de criptografia
 
                     Time_T4 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
-                    if (Time_T4 > 0.9){
-                        System.out.println("T4 NÃO É ESCALONÁVEL: " + Time_T4 + " segundos...\n");
-                    }else{
-                        System.out.println("T4 é escalonável: " + Time_T4 + " segundos...\n");
-                    }
 
                     Region regionJsonCriptografada = criptografarRegion.getRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(regionJsonCriptografada);  // Adiciona a Region criptografada à fila
@@ -260,11 +271,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     criptografarSubRegion.join();  // Aguarda a conclusão da thread de criptografia
 
                     Time_T4 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
-                    if (Time_T4 > 0.9){
-                        System.out.println("T4 NÃO É ESCALONÁVEL: " + Time_T4 + " segundos...\n");
-                    }else{
-                        System.out.println("T4 é escalonável: " + Time_T4 + " segundos...\n");
-                    }
 
                     SubRegion SubregionJsonCriptografada = criptografarSubRegion.getSRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(SubregionJsonCriptografada);  // Adiciona a string criptografada à fila
@@ -292,11 +298,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     criptografarRestRegion.join();  // Aguarda a conclusão da thread de criptografia
 
                     Time_T4 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
-                    if (Time_T4 > 0.9){
-                        System.out.println("T4 NÃO É ESCALONÁVEL: " + Time_T4 + " segundos...\n");
-                    }else{
-                        System.out.println("T4 é escalonável: " + Time_T4 + " segundos...\n");
-                    }
 
                     RestrictedRegion RestregionJsonCriptografada = criptografarRestRegion.getRRegionEncryptedJson();  // Obtém o resultado após a conclusão
                     addRegionFila(RestregionJsonCriptografada);  // Adiciona a Rest region criptografada à fila
@@ -323,12 +324,38 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                     adicionarNaFila.start();
                     adicionarNaFila.join();
 
+                    X.setVisibility(View.VISIBLE);
+                    if (Time_T1 > 0.45){
+                        T1.setText("T1 NÃO É ESCALONÁVEL: " + String.format("%.3f", Time_T1) + " segundos...");
+                    }else{
+                        T1.setText("T1 É ESCALONÁVEL: " + String.format("%.3f", Time_T1) + " segundos...");
+                    }
+
+                    if (Time_T2 > 0.55){
+                        T2.setText("T2 NÃO É ESCALONÁVEL: " + String.format("%.3f", Time_T2) + " segundos...");
+                    }else {
+                        T2.setText("T2 É ESCALONÁVEL: " + String.format("%.3f", Time_T2) + " segundos...");
+                    }
+
+                    if (Time_T3 > 0.85){
+                        T3.setText("T3 NÃO É ESCALONÁVEL: " + String.format("%.3f", Time_T3) + " segundos...");
+                    }else {
+                        T3.setText("T3 É ESCALONÁVEL: " + String.format("%.3f", Time_T3) + " segundos...");
+                    }
+
+                    if (Time_T4 > 0.9){
+                        T4.setText("T4 NÃO É ESCALONÁVEL: " + String.format("%.3f", Time_T4) + " segundos...");
+                    }else{
+                        T4.setText("T4 É ESCALONÁVEL: " + String.format("%.3f", Time_T4) + " segundos...");
+                    }
+
                     Time_T5 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
                     if (Time_T5 > 1.0){
-                        System.out.println("T5 NÃO É ESCALONÁVEL: " + Time_T5 + " segundos...\n");
-                    }else{
-                        System.out.println("T5 é escalonável: " + Time_T5 + " segundos...\n");
+                        T5.setText("T5 NÃO É ESCALONÁVEL: " + String.format("%.3f", Time_T5) + " segundos...");
+                    }else {
+                        T5.setText("T5 É ESCALONÁVEL: " + String.format("%.3f", Time_T5) + " segundos...");
                     }
+                    new Handler().postDelayed(() -> X.setVisibility(View.GONE), 2000);
 
                     String tipoRegion;
                     if (region instanceof SubRegion) {

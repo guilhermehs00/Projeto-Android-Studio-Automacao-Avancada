@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.guilherme.projetoautavancada"
     compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         applicationId = "com.guilherme.projetoautavancada"
