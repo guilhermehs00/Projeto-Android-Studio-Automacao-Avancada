@@ -8,4 +8,8 @@
         <item name="android:statusBarColor">@color/green</item>
     </style>
 
+    <style name="Theme.ProjetoAutAvancada.Atividade_BD" parent="Base.Theme.ProjetoAutAvancada">
+        <!-- Cor da barra de status para a Campus_Virtual -->
+        <item name="android:statusBarColor">@color/blue_BD</item>
+    </style>
 </resources>

@@ -1,6 +1,7 @@
 package com.guilherme.projetoautavancada;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
+import static java.lang.String.valueOf;
 
 import android.Manifest;
 import android.content.Intent;
@@ -9,12 +10,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Layout;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.os.Process;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -32,13 +30,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.guilherme.mylibrary.*;
+import com.guilherme.mylibrary.CriptografarDados;
+import com.guilherme.mylibrary.Region;
+import com.guilherme.mylibrary.RestrictedRegion;
+import com.guilherme.mylibrary.SubRegion;
 
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -62,6 +63,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     private Button GravarBdButtom;
     private Button botaoCamada;
     private Button botaoLimparFila;
+    private Button button_BD;
 
     // Componentes do Mapa
     private GoogleMap mMap;
@@ -117,6 +119,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         addRegionButton = findViewById(R.id.addRegionButton);
         GravarBdButtom = findViewById(R.id.GravarBdButtom);
         botaoCamada = findViewById(R.id.botaoCamada);
+        button_BD = findViewById(R.id.BD);
         botaoLimparFila = findViewById(R.id.botaoLimparFila);
         T1 = findViewById(R.id.T1);
         T2 = findViewById(R.id.T2);
@@ -381,6 +384,12 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
             AnimarBotton.aplicarPulsacao(v);
             RemFaddBD threadRemoverDaFila = new RemFaddBD(db, filaDeRegions, semaphore, uiHandler, AtividadePrincipal.this, notification);
             threadRemoverDaFila.start();
+        });
+
+        button_BD.setOnClickListener(v -> {
+            AnimarBotton.aplicarPulsacao(v);
+            Intent incia_BD = new Intent(this, Atividade_BD.class);
+            startActivity(incia_BD);
         });
 
         botaoLimparFila.setOnClickListener(new View.OnClickListener() {
