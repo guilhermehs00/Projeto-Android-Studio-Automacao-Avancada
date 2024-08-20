@@ -39,17 +39,15 @@ import com.guilherme.mylibrary.Region;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyCallback {
 
     // Constantes
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    double[][] d1 = new double[10][5];
-    double[][] d2 = new double[10][5];
-    double[][] d3 = new double[10][5];
+    double[][] d1 = new double[10][5]; // Trajetória 1
+    double[][] d2 = new double[10][5]; // Trajetória 2
+    double[][] d3 = new double[10][5]; // Trajetória 3
     int num_rota = 0;
 
     // Componentes da Interface do Usuário
@@ -107,14 +105,6 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     private double longitudeAtual = 0.0;
     private int userId;
     private String userName;
-
-    // Gerenciamento de Regiões
-    private final Queue<Region> filaDeRegions = new LinkedList<>();
-    private int contRegion = 0;
-    private int contSubRegion = 0;
-    private int contRestRegion = 0;
-    private boolean ultimaAddSub = false;
-    private Region auxRegion;
 
 
     // Concorrência e Armazenamento
