@@ -1,10 +1,10 @@
 package com.guilherme.projetoautavancada;
 
-import android.os.Handler;
-import android.view.View;
-import android.widget.TextView;
+import com.guilherme.mylibrary.DescriptografarDados;
+import com.guilherme.mylibrary.Region;
+import com.guilherme.mylibrary.RestrictedRegion;
+import com.guilherme.mylibrary.SubRegion;
 
-import com.guilherme.mylibrary.*;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
@@ -19,24 +19,17 @@ public class ConsultaFila extends Thread {
     protected boolean SubRegProx = false;
     protected boolean RestRegProx = false;
 
-    private long tempo_inicio_atividade;
-    private double Time_T2;
-    //private long tempo_inicio;
-    //private long tempo_fim;
-
-    public ConsultaFila(Queue<Region> filaDeRegion, Double lati, Double longi, Semaphore semaphore, CallbackConsulta callback, Region aux, long tempo_inicio_atividade) {
+    public ConsultaFila(Queue<Region> filaDeRegion, Double lati, Double longi, Semaphore semaphore, CallbackConsulta callback, Region aux) {
         this.filaDeRegion = filaDeRegion;
         this.semaphore = semaphore;
         this.lati = lati;
         this.longi = longi;
         this.callback = callback;
         this.aux = aux;
-        this.tempo_inicio_atividade = tempo_inicio_atividade;
     }
 
     @Override
     public void run() {
-        //tempo_inicio = System.nanoTime();
         try {
             semaphore.acquire();
             synchronized (filaDeRegion) {
@@ -61,20 +54,10 @@ public class ConsultaFila extends Thread {
                             calcularDistance(RregionDescriptografada);
                         }
                     }
-
-                    Time_T2 = ((System.nanoTime()  - tempo_inicio_atividade)/1_000_000_000.0);
-
-                    //tempo_fim = System.nanoTime();
-                    //System.out.println("Computação Consultar na Fila: " + ((tempo_fim - tempo_inicio)/1_000_000_000.0) + " segundos.");
-                    callback.onResultado(RegProx, SubRegProx, RestRegProx, regiaoProxima, Time_T2, 0.0);
+                    callback.onResultado(RegProx, SubRegProx, RestRegProx, regiaoProxima);
 
                 } else {
-
-                    Time_T2 = ((System.nanoTime() - tempo_inicio_atividade)/1_000_000_000.0);
-
-                    //tempo_fim = System.nanoTime();
-                    //System.out.println("Computação Consultar na Fila: " + ((tempo_fim - tempo_inicio)/1_000_000_000.0) + " segundos.");
-                    callback.onResultado(false, false, false, null, Time_T2, 0.0);
+                    callback.onResultado(false, false, false, null);
                 }
             }
         } catch (InterruptedException e) {

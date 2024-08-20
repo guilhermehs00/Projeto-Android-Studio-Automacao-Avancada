@@ -1,8 +1,9 @@
 package com.guilherme.mylibrary;
 
 import android.location.Location;
-import java.util.Map;
+
 import java.util.HashMap;
+import java.util.Map;
 
 public class Region {
     protected String name;
@@ -60,7 +61,7 @@ public class Region {
         float[] results = new float[1];
         Location.distanceBetween(lat1, long1, lat2, long2, results);
         //System.out.printf("\nCalculando distancia dentro da Region\nDistância: %.2f metros\n", results[0]);
-        return results[0] < 30;
+        return results[0] < 10;
     }
 
     public String getName() {return name;}

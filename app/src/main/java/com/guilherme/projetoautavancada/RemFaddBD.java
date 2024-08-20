@@ -5,10 +5,13 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.guilherme.mylibrary.*;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.guilherme.mylibrary.DescriptografarDados;
+import com.guilherme.mylibrary.Region;
+import com.guilherme.mylibrary.RestrictedRegion;
+import com.guilherme.mylibrary.SubRegion;
 
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
@@ -59,15 +62,15 @@ public class RemFaddBD extends Thread {
 
             String nomeDoc = " ";
             if (regionDescriptografada != null) {
-                nomeDoc = regionDescriptografada.getName() + " | " + regionDescriptografada.getUser();
+                nomeDoc = regionDescriptografada.getName() ;
             } else if (sregionDescriptografada != null) {
-                nomeDoc = sregionDescriptografada.getName() + " | " + sregionDescriptografada.getUser();
+                nomeDoc = sregionDescriptografada.getName();
             } else if (rregionDescriptografada != null) {
-                nomeDoc = rregionDescriptografada.getName() + " | " + rregionDescriptografada.getUser();
+                nomeDoc = rregionDescriptografada.getName();
             }
 
             // Grava no Firestore
-            DocumentReference docRef = db.collection("Regiões").document(nomeDoc);
+            DocumentReference docRef = db.collection("Y1").document(nomeDoc);
             docRef.set(r.serialize()).addOnSuccessListener(aVoid -> {
                 notification.setText("Salvo no Firestore Database!");
                 notification.setVisibility(View.VISIBLE);

@@ -20,9 +20,6 @@ public class CriptografarDados extends Thread {
     private String mainRegionJsonCriptografada;
     private String restrictedJsonCriptografada;
 
-    //private long tempo_inicio;
-    //private long tempo_fim;
-
     // Contrutor para criptografar uma Região
     public CriptografarDados(Region region) {
         this.region = region;
