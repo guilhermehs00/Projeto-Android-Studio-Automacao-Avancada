@@ -4,7 +4,6 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -34,7 +33,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.guilherme.mylibrary.Region;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,6 +77,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     BitmapDescriptor Inicio;
     BitmapDescriptor Fim;
     BitmapDescriptor user;
+
     private Region F1 = new Region("Medidor 1", -21.280952, -44.765114, 0);
     private Region F2 = new Region("Medidor 2", -21.281311, -44.765197, 0);
     private Region F3 = new Region("Medidor 3", -21.281828, -44.764892, 0);
@@ -96,9 +95,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
     private Region H4 = new Region("Medidor 4", -21.280894, -44.763471, 0);
     private Region H5 = new Region("Medidor 5", -21.281244, -44.763053, 0);
 
-    private Medir_Trajetoria_1 med1;
-    private Medir_Trajetoria_2 med2;
-    private Medir_Trajetoria_3 med3;
+    private Medir_Trajetoria med1;
+    private Medir_Trajetoria med2;
+    private Medir_Trajetoria med3;
 
     // Dados do Usuário e Localização
     private double latitudeAtual = 0.0;
@@ -144,41 +143,10 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
         Fim = BitmapDescriptorFactory.fromResource(R.drawable.fim);
         user = BitmapDescriptorFactory.fromResource(R.drawable.user);
 
-        sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-
-        // Verifique se é a primeira execução
-        boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
-        if (isFirstRun) {
-            // Se for a primeira execução, atualize o valor de isFirstRun para false
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("isFirstRun", false);
-            editor.apply();
-
-            // Inicie a RegisterActivity
-            Intent iniciaRegister = new Intent(this, RegisterActivity.class);
-            startActivity(iniciaRegister);
-            finish();
-            return;
-        }
 
 
-        // Tenta recuperar os dados do usuário da Intent ou das SharedPreferences
-        Intent intent = getIntent();
-        userName = intent.getStringExtra("NomeUsuario");
-        userId = intent.getIntExtra("IdUsuario", -1); // -1 como valor padrão
-
-        // Se os dados não forem encontrados na Intent, tenta recuperar das SharedPreferences
-        if (userName == null || userName.isEmpty() || userId == -1) {
-            userName = sharedPreferences.getString("NomeUsuario", "Nome de Usuário indisponível");
-            userId = sharedPreferences.getInt("IdUsuario", -1); // -1 indica que o ID não está disponível
-        }
-
-        userNameTextView.setText(userName);
-        if (userId != -1) {
-            userIdTextView.setText(valueOf(userId));
-        } else {
-            userIdTextView.setText("ID não disponível");
-        }
+        userNameTextView.setText("User");
+        userIdTextView.setText(valueOf(2024));
 
         addRegionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,7 +182,9 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
             @Override
             public void onClick(View v) {
                 AnimarBotton.aplicarPulsacao(v);
-                exportar_Dados_txt(d1);
+                exportar_Dados_txt(d1, "Dados_rota_1");
+                exportar_Dados_txt(d2, "Dados_rota_2");
+                exportar_Dados_txt(d3, "Dados_rota_2");
             }
         });
 
@@ -252,7 +222,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 if (med2 != null) med2.interrupt();
                 if (med3 != null) med3.interrupt();
 
-                med1 = new Medir_Trajetoria_1(this, num_medicao, notification, notification2, labelsizeFila, addRegionButton, GravarBdButtom, uiHandler,
+                med1 = new Medir_Trajetoria(this, num_medicao, notification, notification2, labelsizeFila, addRegionButton, GravarBdButtom, uiHandler,
                         F1, F2, F3, F4, F5, F6, d1);
                 med1.start();
 
@@ -263,7 +233,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 if (med1 != null) med1.interrupt();
                 if (med3 != null) med3.interrupt();
 
-                med2 = new Medir_Trajetoria_2(this, num_medicao, notification, notification2, labelsizeFila, addRegionButton, GravarBdButtom, uiHandler,
+                med2 = new Medir_Trajetoria(this, num_medicao, notification, notification2, labelsizeFila, addRegionButton, GravarBdButtom, uiHandler,
                         F1, G2, G3, G4, G5, F6, d3);
                 med2.start();
 
@@ -274,7 +244,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
                 if (med1 != null) med1.interrupt();
                 if (med2 != null) med2.interrupt();
 
-                med3 = new Medir_Trajetoria_3(this, num_medicao, notification, notification2, labelsizeFila, addRegionButton, GravarBdButtom, uiHandler,
+                med3 = new Medir_Trajetoria(this, num_medicao, notification, notification2, labelsizeFila, addRegionButton, GravarBdButtom, uiHandler,
                         F1, H2, H3, H4, H5, F6, d2);
                 med3.start();
             } else {
@@ -447,7 +417,7 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
             }
         }
         if (!TemZero) {
-            exportar_Dados_txt(d);
+            exportar_Dados_txt(d, "Dados_rota");
             double[] D = Calculo.Media(d);
             double[] Sigma = Calculo.DesvioPadrao(d, D);
             double[] V = Calculo.Variancia(Sigma);
@@ -495,13 +465,13 @@ public class AtividadePrincipal extends AppCompatActivity implements OnMapReadyC
             new Handler().postDelayed(() -> notification2.setVisibility(View.GONE), 1500);
         }
     }
-    public void exportar_Dados_txt(double[][] d) {
+    public void exportar_Dados_txt(double[][] d, String nome_) {
         File directory = new File(Environment.getExternalStorageDirectory(), "MyAppData");
         if (!directory.exists()) {
             directory.mkdirs(); // Cria o diretório, se não existir
         }
 
-        File file = new File(directory, "dados.txt");
+        File file = new File(directory, nome_);
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             StringBuilder sb = new StringBuilder();

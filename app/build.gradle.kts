@@ -35,9 +35,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":mylibrary"))
     implementation("org.ejml:ejml-simple:0.41")
-    //implementation("com.guilherme:bibliotecacalculosautavancada:1.2")
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore-ktx")

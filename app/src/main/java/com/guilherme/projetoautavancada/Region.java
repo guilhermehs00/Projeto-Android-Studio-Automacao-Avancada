@@ -1,4 +1,4 @@
-package com.guilherme.mylibrary;
+package com.guilherme.projetoautavancada;
 
 import android.location.Location;
 
